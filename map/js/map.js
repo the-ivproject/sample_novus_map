@@ -3,23 +3,25 @@ const mapbox_token = 'pk.eyJ1Ijoibm92dXMxMDIwIiwiYSI6ImNrcGltcnp0MzBmNzUybnFlbjl
 
 //YOUR TURN: add your Mapbox token
 mapboxgl.accessToken = mapbox_token
+// mapboxgl.accessToken = 'pk.eyJ1Ijoibm92dXMxMDIwIiwiYSI6ImNrcGltcnp0MzBmNzUybnFlbjlzb2R6cXEifQ.GjmiO9cPjoIozKaG7nJ4qA'; var map = new mapboxgl.Map({ container: 'map', // container id style: 'mapbox://styles/mapbox/streets-v11', center: [-96, 37.8], // starting position zoom: 3 // starting zoom }); // Add geolocate control to the map. map.addControl( new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }) );
 
 var map = new mapboxgl.Map({
     container: 'map', // container id
-    style: 'mapbox://styles/mapbox/dark-v10', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
-    center: [31.237400233484536, 88.7984904553465], // starting position [lng, lat]
+    style: 'mapbox://styles/mapbox/streets-v11', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
+    center: [25.237400233484536, 88.7984904553465], // starting position [lng, lat]
+    attributionControl: false
 });
 
-map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
 // geocoder/searchbar
 var geocoder = new MapboxGeocoder({ // Initialize the geocoder
     accessToken: mapbox_token, // Set the access token
     mapboxgl: mapboxgl, // Set the mapbox-gl instance
 });
-
 // Add the geocoder to the map
 map.addControl(geocoder);
+map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
 
 let a = $.ajax({
     type: "GET",
@@ -59,7 +61,7 @@ let a = $.ajax({
             let result = map.getSource('query-results')
             result.setData(turf.featureCollection(featuresInBuffer));
 
-            let list = document.getElementById('query-total')
+            let list = document.getElementById('listing')
             let newList = result._data.features.map(a => {
                 let coor = a.geometry.coordinates.map(c => {
                     return c.toFixed(3)
@@ -69,11 +71,11 @@ let a = $.ajax({
                     <a>
                         <p class="query-res"><span class="small-date">${a.properties['title'].replace("Provider", "")}</span>
                         <br>
-                        <span style="font-weight:400;color:#0000008a;font-size:14px">${a.properties['address-display']}</span>
+                        <span style="font-weight:400;color:#0000008a;font-size:12px">${a.properties['address-display']}</span>
                         <br>
-                        <span onclick="openInNewTab('${a.properties['provider-website']}')" style="font-weight:normal;color:blue;"> ${a.properties['phone']} | Website</span>
+                        <span onclick="openInNewTab('${a.properties['provider-website']}')" style="font-weight:normal;color:blue;font-size:12px"> ${a.properties['phone']} | Website</span>
                         <br>
-                        <span style="font-weight:normal;font-size:12px;font-style:italic"> ${a.properties['filter']}</span>
+                        <span style="font-weight:normal;font-size:12px;font-style:italic;"> ${a.properties['filter']}</span>
                         <input type="hidden" value=${coor[0]}>
                         <input type="hidden" value=${coor[1]}>
                         </p>
@@ -110,18 +112,20 @@ let a = $.ajax({
             let u = list.querySelectorAll('li')
             let p = new mapboxgl.Popup({
                 closeOnMove: true,
+                closeButton: false
             })
             for (let i in u) {
                 if (i > 1) {
                     let l = u[i]
                     l.addEventListener("mouseover", function (event) {
                         let c = event.target.querySelectorAll("input")
+                        let content = event.target.querySelectorAll("span.small-date")[0]
                         let lat = c[0].value
                         let long = c[1].value
 
                         let popup = p
                             .setLngLat([lat, long])
-                            .setHTML(`<p>Hovered</p>`)
+                            .setHTML(`<p style="font-weight:bold;margin-bottom:0">Provider</p><a>${content.innerText}</a>`)
                             .addTo(map);
                     })
                 }
@@ -137,10 +141,12 @@ let a = $.ajax({
         let currentM = new mapboxgl.Marker()
         navigator.geolocation.getCurrentPosition(position => {
             eventLngLat = [position.coords.longitude, position.coords.latitude]
+            console.log(eventLngLat)
             currentM.setLngLat(eventLngLat)
                 .addTo(map);
             query(eventLngLat)
         })
+        
         if (geocoder) {
             eventLngLat = ''
             geocoder.on('result', (e) => {
@@ -151,33 +157,6 @@ let a = $.ajax({
                 console.log('geo', geocoder)
             });
         }
-        // map.addLayer({
-        //     'id': 'novus',
-        //     'type': 'circle',
-        //     'source': {
-        //         'type': 'geojson',
-        //         'data': geojson
-        //     },
-        //     'paint': {
-        //         'circle-color': {
-        //             property: 'frp',
-        //             stops: [
-        //                 [0, '#ee9b00'],
-        //                 [1.5, '#ca6702'],
-        //                 [2, '#5a189a'],
-        //                 [2.5, '#9b2226'],
-        //                 [3, '#d00000'],
-        //             ]
-        //         },
-        //         'circle-radius': 3,
-        //         'circle-stroke-width': 1,
-        //         'circle-stroke-color': 'white',
-        //         'circle-stroke-opacity': 1
-        //     }
-        // });
-        // Add a GeoJSON source containing place coordinates and information.
-        // Initialize the geolocate control.
-
 
         map.addLayer({
             id: 'query-radius',
@@ -214,8 +193,22 @@ let a = $.ajax({
             }
         });
 
+        let UseBbox = (geo, pad) => {
+            let bbox = turf.bbox(geo);
+            map.fitBounds(bbox, {
+                padding: pad
+            })
+        }
+
+        UseBbox(geojson, 200)
+
         var filterGroup = document.getElementById('menu');
+        
+        let color = ['dropship', '#ee9b00', 'delivery-citywide', '#ca6702', 'delivery-statewide-THC', '#5a189a', 'other', '#9b2226',
+                     'dispensary-delivery-thc', '#d00000', 'deliver', '#e9c46a', 'deliver-statewide', '#023047']
+
         geojson.features.forEach(function (feature) {
+
             var type = feature.properties['filter'];
             var layerID = 'poi-' + type;
             // Add a layer for this symbol type if it hasn't been added already.
@@ -229,7 +222,7 @@ let a = $.ajax({
                             'match',
                             ['get', 'filter'],
                             'dropship', '#ee9b00', 'delivery-citywide', '#ca6702', 'delivery-statewide-THC', '#5a189a', 'other', '#9b2226',
-                            'dispensary-delivery-thc', '#d00000', 'deliver', '#e9c46a', 'deliver-statewide', '#023047', '#023047'
+                            'dispensary-delivery-thc', '#d00000', 'deliver', '#e9c46a', 'deliver-statewide', '#023047','#023047'
                         ],
                         'circle-radius': 4,
                         'circle-stroke-width': 1,
@@ -240,16 +233,23 @@ let a = $.ajax({
                 });
                 // console.log(layerID)
                 // Add checkbox and label elements for the layer.
+                let div = document.createElement('div')
+                div.className = 'dbgCont'
+
                 var input = document.createElement('input');
                 input.type = 'checkbox';
                 input.id = layerID;
                 input.checked = true;
-                filterGroup.appendChild(input);
+                input.className = 'dbgCheck'
+                div.appendChild(input);
 
                 var label = document.createElement('label');
                 label.setAttribute('for', layerID);
-                label.textContent = type;
-                filterGroup.appendChild(label);
+                label.textContent = type.toUpperCase();
+                label.className = "checkbox-inline";
+                div.appendChild(label);
+
+                filterGroup.appendChild(div)
 
                 // When the checkbox changes, update the visibility of the layer.
                 input.addEventListener('change', function (e) {
@@ -261,14 +261,5 @@ let a = $.ajax({
                 });
             }
         })
-        let UseBbox = (geo, pad) => {
-            let bbox = turf.bbox(geo);
-            map.fitBounds(bbox, {
-                padding: pad
-            })
-        }
-
-        UseBbox(geojson, 50)
-
     });
 })
