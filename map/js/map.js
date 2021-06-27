@@ -87,7 +87,7 @@ let a = $.ajax({
                         <br>
                         <span onclick="openInNewTab('${a.properties['provider-website']}')" style="font-weight:normal;color:blue;font-size:12px"> ${a.properties['phone']} | Website</span>
                         <br>
-                        <span style="font-weight:normal;font-size:12px;font-style:italic;"> ${a.properties['filter']}</span>
+                        <span style="font-weight:normal;font-size:12px;;"> ${a.properties['filter']}</span>
                         <input type="hidden" value=${coor[0]}>
                         <input type="hidden" value=${coor[1]}>
                         </p>
