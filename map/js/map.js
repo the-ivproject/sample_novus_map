@@ -225,7 +225,7 @@ let a = $.ajax({
                     'source': 'novus',
                     'paint': {
                         'circle-color':'#41a1fb',
-                        'circle-radius': 6,
+                        'circle-radius': 4,
                         'circle-stroke-width': 2,
                         'circle-stroke-color': 'white',
                         'circle-stroke-opacity': 1
