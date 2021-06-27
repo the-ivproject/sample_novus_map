@@ -37,7 +37,7 @@
 </head>
 <style>
      #menu {
-        background: #fff;
+        background: #f0f0f0;
         z-index: 1;
         /* border-radius: 3px; */
         font-family: 'Open Sans', sans-serif;
@@ -48,7 +48,7 @@
         position: absolute;
         margin: auto;
         border: 1px solid #0000;
-        width: 75%;
+        /* width: 75%; */
         box-shadow: 0 0 10px 2px rgb(0 0 0 / 10%);
     }
 
@@ -83,11 +83,28 @@
     .header-menu {
         padding: 8px 0;
     }
+    #hide-bar {
+        visibility: hidden;
+    }
+    #show-bar {
+        visibility: block;
+        transition: opacity 250ms ease-in;
+    }
+    .mapboxgl-ctrl-bottom-right {
+        bottom: 0 !important;
+        transition: opacity 250ms ease-in;
+    }
+
+    #query-count {
+        background-color: #23A455 !important;
+    }
+    .mapboxgl-ctrl-logo {
+        display: none !important;
+    }
 </style>
 <body>
    
     <div id='map' class='map'></div>
-    <div id="menu"></div>
 
     <div class='pin-topleft pin-bottomleft z1 col3 listing-container'>
         <div class='fill-white full-height-container'>
@@ -99,18 +116,18 @@
                     <li class="header-menu">
                         <span style="font-size: 16px;font-weight: bold;">Search Results</span>
                         <span id="query-count" class="badge badge-pill badge-success"
-                            style="padding: 5px 10px;border-radius: 2px;float:right;margin-rigth:5px">0</span>
+                            style="padding: 5px 10px;border-radius: 2px;float:right;margin-right:5px">0</span>
                     </li>
                 </ul>
                 <ul id="default">
                     <li class="header-menu">
-                        <span style="font-weight: bold;color:#0000007d;">No data found. . . . . . </span>
+                        <span style="color:#0000007d;font-size: 12px;">No data found. . . . . . </span>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-
+    <div id="menu"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
         integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous">
     </script>
@@ -125,6 +142,8 @@
         function openInNewTab(url) {
             window.open(url, '_blank').focus();
         }
+        let pl = document.querySelector(".mapboxgl-ctrl-geocoder--input").placeholder = 'Search city / zip'
+        document.querySelector('.listing-container').id = 'hide-bar'
     </script>
 </body>
 

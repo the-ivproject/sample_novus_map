@@ -8,8 +8,8 @@ mapboxgl.accessToken = mapbox_token
 var map = new mapboxgl.Map({
     container: 'map', // container id
     style: 'mapbox://styles/mapbox/streets-v11', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
-    center: [25.237400233484536, 88.7984904553465], // starting position [lng, lat]
-    attributionControl: false
+    center: [-101.67517342866886,39.148784399009294], // starting position [lng, lat]
+    // attributionControl: false
 });
 
 
@@ -20,7 +20,7 @@ var geocoder = new MapboxGeocoder({ // Initialize the geocoder
 });
 // Add the geocoder to the map
 map.addControl(geocoder);
-map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
 
 let a = $.ajax({
@@ -32,7 +32,15 @@ let a = $.ajax({
     }
 }).done(geojson => {
 
+    let UseBbox = (geo, pad) => {
+        let bbox = turf.bbox(geo);
+        map.fitBounds(bbox, {
+            padding: pad,
+        })
+    }
+
     map.on('load', () => {
+       
         let query = (latlng) => {
             let makeRadius = (lngLatArray, radiusInMiles) => {
                 var point = turf.point(lngLatArray);
@@ -46,8 +54,8 @@ let a = $.ajax({
 
             let source = map.getSource('query-radius')
             source.setData(searchRadius);
-
-            UseBbox(source._data, 100)
+            
+            UseBbox(source._data, 70)
 
             let spatialJoin = (sourceGeoJSON, filterFeature) => {
                 let joined = sourceGeoJSON.features.filter(function (feature) {
@@ -60,6 +68,10 @@ let a = $.ajax({
 
             let result = map.getSource('query-results')
             result.setData(turf.featureCollection(featuresInBuffer));
+            
+            if(result._data.features.length === 0) {
+                let side =  document.querySelector('.listing-container').id = 'hide-bar'
+            }
 
             let list = document.getElementById('listing')
             let newList = result._data.features.map(a => {
@@ -144,17 +156,17 @@ let a = $.ajax({
             console.log(eventLngLat)
             currentM.setLngLat(eventLngLat)
                 .addTo(map);
+            document.querySelector('.listing-container').id = 'show-bar'
             query(eventLngLat)
         })
-        
         if (geocoder) {
-            eventLngLat = ''
+            eventLngLat = '';
             geocoder.on('result', (e) => {
                 eventLngLat = e.result.geometry.coordinates
                 currentM.setLngLat(eventLngLat)
                     .addTo(map);
+                document.querySelector('.listing-container').id = 'show-bar'
                 query(eventLngLat)
-                console.log('geo', geocoder)
             });
         }
 
@@ -187,20 +199,14 @@ let a = $.ajax({
             paint: {
                 'circle-radius': 8,
                 'circle-stroke-width': 2,
-                'circle-stroke-color': '#00f5d4',
+                'circle-stroke-color': 'orange',
                 'circle-stroke-opacity': 1,
                 "circle-opacity": 0,
             }
         });
 
-        let UseBbox = (geo, pad) => {
-            let bbox = turf.bbox(geo);
-            map.fitBounds(bbox, {
-                padding: pad
-            })
-        }
-
-        UseBbox(geojson, 200)
+      
+        UseBbox(geojson,100)
 
         var filterGroup = document.getElementById('menu');
         
@@ -208,8 +214,8 @@ let a = $.ajax({
                      'dispensary-delivery-thc', '#d00000', 'deliver', '#e9c46a', 'deliver-statewide', '#023047']
 
         geojson.features.forEach(function (feature) {
-
-            var type = feature.properties['filter'];
+            
+            var type = feature.properties['type'];
             var layerID = 'poi-' + type;
             // Add a layer for this symbol type if it hasn't been added already.
             if (!map.getLayer(layerID)) {
@@ -218,18 +224,13 @@ let a = $.ajax({
                     'type': 'circle',
                     'source': 'novus',
                     'paint': {
-                        'circle-color': [
-                            'match',
-                            ['get', 'filter'],
-                            'dropship', '#ee9b00', 'delivery-citywide', '#ca6702', 'delivery-statewide-THC', '#5a189a', 'other', '#9b2226',
-                            'dispensary-delivery-thc', '#d00000', 'deliver', '#e9c46a', 'deliver-statewide', '#023047','#023047'
-                        ],
-                        'circle-radius': 4,
-                        'circle-stroke-width': 1,
+                        'circle-color':'#41a1fb',
+                        'circle-radius': 6,
+                        'circle-stroke-width': 2,
                         'circle-stroke-color': 'white',
                         'circle-stroke-opacity': 1
                     },
-                    'filter': ['==', 'filter', type]
+                    'filter': ['==', 'type', type]
                 });
                 // console.log(layerID)
                 // Add checkbox and label elements for the layer.
@@ -245,7 +246,7 @@ let a = $.ajax({
 
                 var label = document.createElement('label');
                 label.setAttribute('for', layerID);
-                label.textContent = type.toUpperCase();
+                label.textContent = type;
                 label.className = "checkbox-inline";
                 div.appendChild(label);
 
