@@ -33,12 +33,20 @@ body * {
 .full-height-container {
   overflow: hidden;
   height: 100%;
-  padding: 20px
+  /* padding: 20px */
 }
 
 .full-height-container .scroll {
   overflow: auto;
   height: 100%;
+}
+
+.query-res {
+  padding:5px
+}
+
+.fill-light {
+  background-color: #fff;
 }
 
 .loading:before {

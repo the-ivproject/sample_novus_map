@@ -3,9 +3,9 @@ const mapbox_token = 'pk.eyJ1Ijoibm92dXMxMDIwIiwiYSI6ImNrcGltcnp0MzBmNzUybnFlbjl
 
 //YOUR TURN: add your Mapbox token
 mapboxgl.accessToken = mapbox_token
-// mapboxgl.accessToken = 'pk.eyJ1Ijoibm92dXMxMDIwIiwiYSI6ImNrcGltcnp0MzBmNzUybnFlbjlzb2R6cXEifQ.GjmiO9cPjoIozKaG7nJ4qA'; var map = new mapboxgl.Map({ container: 'map', // container id style: 'mapbox://styles/mapbox/streets-v11', center: [-96, 37.8], // starting position zoom: 3 // starting zoom }); // Add geolocate control to the map. map.addControl( new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }) );
+// mapboxgl.accessToken = 'pk.eyJ1Ijoibm92dXMxMDIwIiwiYSI6ImNrcGltcnp0MzBmNzUybnFlbjlzb2R6cXEifQ.GjmiO9cPjoIozKaG7nJ4qA'; let map = new mapboxgl.Map({ container: 'map', // container id style: 'mapbox://styles/mapbox/streets-v11', center: [-96, 37.8], // starting position zoom: 3 // starting zoom }); // Add geolocate control to the map. map.addControl( new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }) );
 
-var map = new mapboxgl.Map({
+let map = new mapboxgl.Map({
     container: 'map', // container id
     style: 'mapbox://styles/mapbox/streets-v11', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
     center: [-101.67517342866886,39.148784399009294], // starting position [lng, lat]
@@ -14,7 +14,7 @@ var map = new mapboxgl.Map({
 
 
 // geocoder/searchbar
-var geocoder = new MapboxGeocoder({ // Initialize the geocoder
+let geocoder = new MapboxGeocoder({ // Initialize the geocoder
     accessToken: mapbox_token, // Set the access token
     mapboxgl: mapboxgl, // Set the mapbox-gl instance
 });
@@ -43,8 +43,8 @@ let a = $.ajax({
        
         let query = (latlng) => {
             let makeRadius = (lngLatArray, radiusInMiles) => {
-                var point = turf.point(lngLatArray);
-                var buffered = turf.buffer(point, radiusInMiles, {
+                let point = turf.point(lngLatArray);
+                let buffered = turf.buffer(point, radiusInMiles, {
                     units: 'miles'
                 });
                 return buffered;
@@ -68,7 +68,7 @@ let a = $.ajax({
 
             let result = map.getSource('query-results')
             result.setData(turf.featureCollection(featuresInBuffer));
-            
+
             if(result._data.features.length === 0) {
                 let side =  document.querySelector('.listing-container').id = 'hide-bar'
             }
@@ -131,13 +131,25 @@ let a = $.ajax({
                     let l = u[i]
                     l.addEventListener("mouseover", function (event) {
                         let c = event.target.querySelectorAll("input")
-                        let content = event.target.querySelectorAll("span.small-date")[0]
+                        let content = event.target.querySelectorAll(".query-res span")
+                        console.log(content[1].innerText)
                         let lat = c[0].value
                         let long = c[1].value
 
                         let popup = p
                             .setLngLat([lat, long])
-                            .setHTML(`<p style="font-weight:bold;margin-bottom:0">Provider</p><a>${content.innerText}</a>`)
+                            .setHTML(`
+                            <a>
+                            <p class="query-res"><span class="small-date">${content[0].innerText}</span>
+                            <br>
+                            <span style="font-weight:400;color:#0000008a;font-size:12px">${content[1].innerText}</span>
+                            <br>
+                            <span style="font-weight:normal;color:blue;font-size:12px">${content[2].innerText}</span>
+                            <br>
+                            <span style="font-weight:normal;font-size:12px;;">${content[3].innerText}</span>
+                            </p>
+                            </a>
+                            `)
                             .addTo(map);
                     })
                 }
@@ -208,15 +220,15 @@ let a = $.ajax({
       
         UseBbox(geojson,100)
 
-        var filterGroup = document.getElementById('menu');
+        let filterGroup = document.getElementById('menu');
         
         let color = ['dropship', '#ee9b00', 'delivery-citywide', '#ca6702', 'delivery-statewide-THC', '#5a189a', 'other', '#9b2226',
                      'dispensary-delivery-thc', '#d00000', 'deliver', '#e9c46a', 'deliver-statewide', '#023047']
 
-        geojson.features.forEach(function (feature) {
+        geojson.features.forEach((feature,i) => {
             
-            var type = feature.properties['type'];
-            var layerID = 'poi-' + type;
+            let type = feature.properties['type'];
+            let layerID = 'poi-' + type;
             // Add a layer for this symbol type if it hasn't been added already.
             if (!map.getLayer(layerID)) {
                 map.addLayer({
@@ -237,18 +249,36 @@ let a = $.ajax({
                 let div = document.createElement('div')
                 div.className = 'dbgCont'
 
-                var input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = layerID;
-                input.checked = true;
-                input.className = 'dbgCheck'
-                div.appendChild(input);
+                let lab = document.createElement('label')
+                lab.innerText = type
+                lab.className = 'container'
+                lab.setAttribute('for', layerID)
 
-                var label = document.createElement('label');
-                label.setAttribute('for', layerID);
-                label.textContent = type;
-                label.className = "checkbox-inline";
-                div.appendChild(label);
+                let input = document.createElement('input')
+                input.id = layerID
+                input.type = "checkbox"
+                input.name = `radio${i}`
+                input.checked = true
+
+                let span = document.createElement('span')
+                span.className = `checkmark c${i}`
+
+                lab.appendChild(input)
+                lab.appendChild(span)
+
+                // div.appendChild(inp)
+                // let input = document.createElement('input');
+                // input.type = 'checkbox';
+                // input.id = layerID;
+                // input.checked = true;
+                // // input.className = 'dbgCheck'
+                div.appendChild(lab);
+
+                // let label = document.createElement('label');
+                // label.setAttribute('for', layerID);
+                // label.textContent = type;
+                // label.className = "lbl padding-8";
+                // div.appendChild(elements);
 
                 filterGroup.appendChild(div)
 
@@ -259,6 +289,7 @@ let a = $.ajax({
                         'visibility',
                         e.target.checked ? 'visible' : 'none'
                     );
+                    console.log(e)
                 });
             }
         })

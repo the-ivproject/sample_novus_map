@@ -1,0 +1,124 @@
+.container {
+    display: block;
+    position: relative;
+    padding-left: 33px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 12px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+/* Hide the browser's default checkbox */
+.container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    /* background-color: #eee; */
+    background-color: #2196f34a;
+    border-radius: 15px;
+}
+
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c0 {
+    background-color: #03045e;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c1 {
+    background-color: #f72585;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c2 {
+    background-color: #ffd60a;
+}
+
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c7 {
+    background-color: #06d6a0;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c10 {
+    background-color: #c1121f;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c19 {
+    background-color: #240046;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c21 {
+    background-color: #d00000;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c24 {
+    background-color: #a5be00;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c53 {
+    background-color: #605f5e;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c83 {
+    background-color: #0d21a1;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c165 {
+    background-color: #1f7a8c;
+}
+
+/* On mouse-over, add a grey background color */
+.container:hover input~.c167 {
+    background-color: #20bf55;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.c167 {
+    background-color: #cc8b63;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    /* background-color: #2196f34a; */
+}
+
+/* Show the checkmark when checked */
+.container input:checked~.checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+.container .checkmark:after {
+    width: 17px;
+    height: 17px;
+    border: solid #f0f0f0;
+    border-width: 2px;
+    border-radius: 50%;
+    margin: 4px;
+}
